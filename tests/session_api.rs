@@ -1,6 +1,6 @@
 //! Public API behavior, independent of the historical batch fixture adapters.
 use bytes::Bytes;
-use rtmpx::{
+use kstream_rtmp::{
     DropPolicy, EncodeOptions, HeaderMode, Packet, Payload, PayloadPool, PayloadPoolConfig,
     Segments,
     chunk_io::ChunkEncoder,

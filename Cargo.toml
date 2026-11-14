@@ -1,14 +1,22 @@
 [package]
-name = "rtmpx"
-version = "3.1.1"
+name = "kstream-rtmp"
+version = "0.1.0"
 edition = "2024"
 rust-version = "1.97"
 license = "MIT"
-description = "Sans-I/O (Enhanced) RTMP protocol API with AMF0/AMF3"
-repository = "https://github.com/darfink/rtmpx"
+description = "Sans-I/O (Enhanced) RTMP protocol engine for kstream — trimmed, Android-ready fork of rtmpx"
+repository = "https://github.com/Shrawan-13/kstream-rtmp"
 readme = "README.md"
-keywords = ["rtmp", "amf", "flv", "streaming", "media"]
+keywords = ["rtmp", "amf", "flv", "streaming", "media", "kstream", "android"]
 categories = ["multimedia", "network-programming"]
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
+panic = "abort"
+overflow-checks = false
 
 [dependencies]
 bytes = "1"

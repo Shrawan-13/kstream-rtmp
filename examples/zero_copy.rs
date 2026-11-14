@@ -1,6 +1,6 @@
 //! Run with `cargo run --example zero_copy`.
 use bytes::Bytes;
-use rtmpx::{
+use kstream_rtmp::{
     Amf3Document, EnhancedValidationMode, Payload, PayloadPool, ValidatedMedia,
     amf3::{self, Amf3Value},
     chunk_io::{ChunkEncoder, MessageDecoder, Packet},
@@ -10,7 +10,7 @@ use rtmpx::{
 use std::io::{self, IoSlice, Write};
 
 // Works with TcpStream and other vectored writers. The protocol core performs no I/O.
-fn write_packet<P: rtmpx::Segments>(
+fn write_packet<P: kstream_rtmp::Segments>(
     writer: &mut impl Write,
     mut packet: Packet<P>,
 ) -> io::Result<()> {
@@ -43,16 +43,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             message_stream_id: 1,
             data,
         },
-        rtmpx::EncodeOptions {
+        kstream_rtmp::EncodeOptions {
             headers: if false {
-                rtmpx::HeaderMode::Full
+                kstream_rtmp::HeaderMode::Full
             } else {
-                rtmpx::HeaderMode::Compressed
+                kstream_rtmp::HeaderMode::Compressed
             },
             drop_policy: if false {
-                rtmpx::DropPolicy::Allowed
+                kstream_rtmp::DropPolicy::Allowed
             } else {
-                rtmpx::DropPolicy::Never
+                kstream_rtmp::DropPolicy::Never
             },
         },
     )?;
@@ -63,7 +63,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     write_packet(&mut transport, plan)?;
     let mut received = Bytes::from(transport);
     let mut decoder = MessageDecoder::new();
-    decoder.set_payload_pool(PayloadPool::new(rtmpx::PayloadPoolConfig {
+    decoder.set_payload_pool(PayloadPool::new(kstream_rtmp::PayloadPoolConfig {
         max_cached_payloads: 16,
         max_descriptors_per_payload: 8193,
     }));
@@ -79,16 +79,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut relay = ChunkEncoder::new();
     let forwarded = relay.encode(
         message,
-        rtmpx::EncodeOptions {
+        kstream_rtmp::EncodeOptions {
             headers: if false {
-                rtmpx::HeaderMode::Full
+                kstream_rtmp::HeaderMode::Full
             } else {
-                rtmpx::HeaderMode::Compressed
+                kstream_rtmp::HeaderMode::Compressed
             },
             drop_policy: if false {
-                rtmpx::DropPolicy::Allowed
+                kstream_rtmp::DropPolicy::Allowed
             } else {
-                rtmpx::DropPolicy::Never
+                kstream_rtmp::DropPolicy::Never
             },
         },
     )?;

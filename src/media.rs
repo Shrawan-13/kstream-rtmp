@@ -35,7 +35,7 @@ pub use crate::flv::{ParsedAudio, ParsedVideo};
 ///
 /// ```
 /// use bytes::Bytes;
-/// use rtmpx::{EnhancedValidationMode, MediaInterpretation, ValidatedMedia};
+/// use kstream_rtmp::{EnhancedValidationMode, MediaInterpretation, ValidatedMedia};
 ///
 /// let raw = Bytes::from_static(b"\x91Opusframe");
 /// let media =

@@ -1,12 +1,12 @@
 //! Fixture adapter for the historical wire corpus. Not part of the library API.
 //! It coalesces outputs so existing protocol assertions remain easy to compare.
 #![allow(dead_code, unused_imports)]
-pub use rtmpx::*;
+pub use kstream_rtmp::*;
 pub mod chunk_io {
-    pub use rtmpx::chunk_io::*;
-    pub struct ChunkEncoder(rtmpx::chunk_io::ChunkEncoder);
+    pub use kstream_rtmp::chunk_io::*;
+    pub struct ChunkEncoder(kstream_rtmp::chunk_io::ChunkEncoder);
     impl std::ops::Deref for ChunkEncoder {
-        type Target = rtmpx::chunk_io::ChunkEncoder;
+        type Target = kstream_rtmp::chunk_io::ChunkEncoder;
         fn deref(&self) -> &Self::Target {
             &self.0
         }
@@ -18,7 +18,7 @@ pub mod chunk_io {
     }
     impl ChunkEncoder {
         pub fn new() -> Self {
-            Self(rtmpx::chunk_io::ChunkEncoder::new())
+            Self(kstream_rtmp::chunk_io::ChunkEncoder::new())
         }
         pub fn serialize<D: crate::api::Segments + Clone + Into<crate::api::Payload>>(
             &mut self,
@@ -53,19 +53,19 @@ pub mod chunk_io {
 }
 pub mod sessions {
     use bytes::Bytes;
-    pub use rtmpx::sessions::*;
-    use rtmpx::{DropPolicy, Packet, Payload, amf0::Amf0Object, time::RtmpTimestamp};
-    pub type DataMessage<D = Bytes> = rtmpx::sessions::DataMessage<D>;
+    pub use kstream_rtmp::sessions::*;
+    use kstream_rtmp::{DropPolicy, Packet, Payload, amf0::Amf0Object, time::RtmpTimestamp};
+    pub type DataMessage<D = Bytes> = kstream_rtmp::sessions::DataMessage<D>;
     pub type ServerSessionEvent<D = Bytes> = ServerEvent<D>;
     pub type ClientSessionEvent<D = Bytes> = ClientEvent<D>;
     pub type ServerSessionResult<D = Bytes> = ServerOutput<D>;
     pub type ClientSessionResult<D = Bytes> = ClientOutput<D>;
-    pub struct ServerSession(rtmpx::sessions::ServerSession);
-    pub struct ClientSession(rtmpx::sessions::ClientSession);
+    pub struct ServerSession(kstream_rtmp::sessions::ServerSession);
+    pub struct ClientSession(kstream_rtmp::sessions::ClientSession);
     macro_rules! shared {
         ($session:ident,$output:ident,$error:ident,$config:ident) => {
             impl std::ops::Deref for $session {
-                type Target = rtmpx::sessions::$session;
+                type Target = kstream_rtmp::sessions::$session;
                 fn deref(&self) -> &Self::Target {
                     &self.0
                 }
@@ -77,9 +77,9 @@ pub mod sessions {
             }
             impl $session {
                 pub fn new(config: $config) -> Result<(Self, Vec<$output<Bytes>>), $error> {
-                    Ok((Self(rtmpx::sessions::$session::new(config)?), Vec::new()))
+                    Ok((Self(kstream_rtmp::sessions::$session::new(config)?), Vec::new()))
                 }
-                pub fn into_inner(self) -> rtmpx::sessions::$session {
+                pub fn into_inner(self) -> kstream_rtmp::sessions::$session {
                     self.0
                 }
                 fn drain(&mut self) -> Result<Vec<$output<Bytes>>, $error> {
@@ -201,7 +201,7 @@ pub mod sessions {
             self.0.send_data(self.handle(id)?, data)
         }
     }
-    pub fn metadata<D: rtmpx::Segments>(message: &DataMessage<D>) -> StreamMetadata {
+    pub fn metadata<D: kstream_rtmp::Segments>(message: &DataMessage<D>) -> StreamMetadata {
         let mut metadata = StreamMetadata::default();
         metadata.apply_metadata_values(message.metadata().unwrap().unwrap());
         metadata

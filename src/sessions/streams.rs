@@ -55,7 +55,7 @@ impl<T> Streams<T> {
     pub fn new() -> Self {
         static NEXT: AtomicU64 = AtomicU64::new(1);
         let session = NEXT
-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
+            .try_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
             .expect("session identity exhausted");
         Self {
             session,

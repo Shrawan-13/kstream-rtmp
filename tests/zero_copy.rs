@@ -1,5 +1,5 @@
 use bytes::Bytes;
-use rtmpx::{
+use kstream_rtmp::{
     Payload, Segments,
     chunk_io::{ChunkEncoder, ChunkParser, DecoderLimits, MessageDecoder},
     messages::RawMessage,
@@ -35,16 +35,16 @@ fn cursor_survives_every_short_write_and_segment_boundary() {
                 let plan = encoder
                     .encode(
                         msg,
-                        rtmpx::EncodeOptions {
+                        kstream_rtmp::EncodeOptions {
                             headers: if force {
-                                rtmpx::HeaderMode::Full
+                                kstream_rtmp::HeaderMode::Full
                             } else {
-                                rtmpx::HeaderMode::Compressed
+                                kstream_rtmp::HeaderMode::Compressed
                             },
                             drop_policy: if false {
-                                rtmpx::DropPolicy::Allowed
+                                kstream_rtmp::DropPolicy::Allowed
                             } else {
-                                rtmpx::DropPolicy::Never
+                                kstream_rtmp::DropPolicy::Never
                             },
                         },
                     )
@@ -65,11 +65,11 @@ fn cursor_survives_every_short_write_and_segment_boundary() {
                                 message_stream_id: 1,
                                 data: &segmented,
                             },
-                            rtmpx::EncodeOptions {
+                            kstream_rtmp::EncodeOptions {
                                 headers: if force {
-                                    rtmpx::HeaderMode::Full
+                                    kstream_rtmp::HeaderMode::Full
                                 } else {
-                                    rtmpx::HeaderMode::Compressed
+                                    kstream_rtmp::HeaderMode::Compressed
                                 },
                                 ..Default::default()
                             },
@@ -115,16 +115,16 @@ fn every_transport_split_preserves_timestamps_and_payload_ownership() {
                 encoder
                     .encode(
                         message(body.clone(), time),
-                        rtmpx::EncodeOptions {
+                        kstream_rtmp::EncodeOptions {
                             headers: if force {
-                                rtmpx::HeaderMode::Full
+                                kstream_rtmp::HeaderMode::Full
                             } else {
-                                rtmpx::HeaderMode::Compressed
+                                kstream_rtmp::HeaderMode::Compressed
                             },
                             drop_policy: if false {
-                                rtmpx::DropPolicy::Allowed
+                                kstream_rtmp::DropPolicy::Allowed
                             } else {
-                                rtmpx::DropPolicy::Never
+                                kstream_rtmp::DropPolicy::Never
                             },
                         },
                     )
@@ -166,16 +166,16 @@ fn borrowed_parser_emits_partial_chunk_data_without_buffering() {
     let wire = encoder
         .encode(
             (message(Bytes::from(vec![42; 300]), 10)).clone(),
-            rtmpx::EncodeOptions {
+            kstream_rtmp::EncodeOptions {
                 headers: if false {
-                    rtmpx::HeaderMode::Full
+                    kstream_rtmp::HeaderMode::Full
                 } else {
-                    rtmpx::HeaderMode::Compressed
+                    kstream_rtmp::HeaderMode::Compressed
                 },
                 drop_policy: if false {
-                    rtmpx::DropPolicy::Allowed
+                    kstream_rtmp::DropPolicy::Allowed
                 } else {
-                    rtmpx::DropPolicy::Never
+                    kstream_rtmp::DropPolicy::Never
                 },
             },
         )
@@ -209,16 +209,16 @@ fn interleaving_abort_and_fragment_limits() {
     let first = encoder
         .encode(
             (message(Bytes::from(vec![1; 300]), 0)).clone(),
-            rtmpx::EncodeOptions {
+            kstream_rtmp::EncodeOptions {
                 headers: if false {
-                    rtmpx::HeaderMode::Full
+                    kstream_rtmp::HeaderMode::Full
                 } else {
-                    rtmpx::HeaderMode::Compressed
+                    kstream_rtmp::HeaderMode::Compressed
                 },
                 drop_policy: if false {
-                    rtmpx::DropPolicy::Allowed
+                    kstream_rtmp::DropPolicy::Allowed
                 } else {
-                    rtmpx::DropPolicy::Never
+                    kstream_rtmp::DropPolicy::Never
                 },
             },
         )
@@ -233,16 +233,16 @@ fn interleaving_abort_and_fragment_limits() {
                 data: Bytes::from_static(&[0, 0, 0, 4]),
             })
             .clone(),
-            rtmpx::EncodeOptions {
+            kstream_rtmp::EncodeOptions {
                 headers: if false {
-                    rtmpx::HeaderMode::Full
+                    kstream_rtmp::HeaderMode::Full
                 } else {
-                    rtmpx::HeaderMode::Compressed
+                    kstream_rtmp::HeaderMode::Compressed
                 },
                 drop_policy: if false {
-                    rtmpx::DropPolicy::Allowed
+                    kstream_rtmp::DropPolicy::Allowed
                 } else {
-                    rtmpx::DropPolicy::Never
+                    kstream_rtmp::DropPolicy::Never
                 },
             },
         )
@@ -256,16 +256,16 @@ fn interleaving_abort_and_fragment_limits() {
     let second = encoder
         .encode(
             (message(Bytes::from_static(b"next"), 1)).clone(),
-            rtmpx::EncodeOptions {
+            kstream_rtmp::EncodeOptions {
                 headers: if true {
-                    rtmpx::HeaderMode::Full
+                    kstream_rtmp::HeaderMode::Full
                 } else {
-                    rtmpx::HeaderMode::Compressed
+                    kstream_rtmp::HeaderMode::Compressed
                 },
                 drop_policy: if false {
-                    rtmpx::DropPolicy::Allowed
+                    kstream_rtmp::DropPolicy::Allowed
                 } else {
-                    rtmpx::DropPolicy::Never
+                    kstream_rtmp::DropPolicy::Never
                 },
             },
         )
@@ -325,16 +325,16 @@ fn size_change_is_sent_with_old_chunk_size_and_dropping_does_not_break_history()
     let first = serializer
         .encode(
             (original).as_ref(),
-            rtmpx::EncodeOptions {
+            kstream_rtmp::EncodeOptions {
                 headers: if false {
-                    rtmpx::HeaderMode::Full
+                    kstream_rtmp::HeaderMode::Full
                 } else {
-                    rtmpx::HeaderMode::Compressed
+                    kstream_rtmp::HeaderMode::Compressed
                 },
                 drop_policy: if false {
-                    rtmpx::DropPolicy::Allowed
+                    kstream_rtmp::DropPolicy::Allowed
                 } else {
-                    rtmpx::DropPolicy::Never
+                    kstream_rtmp::DropPolicy::Never
                 },
             },
         )
@@ -346,16 +346,16 @@ fn size_change_is_sent_with_old_chunk_size_and_dropping_does_not_break_history()
     let discarded = serializer
         .encode(
             message(Bytes::from_static(b"bbb"), 20),
-            rtmpx::EncodeOptions {
+            kstream_rtmp::EncodeOptions {
                 headers: if false {
-                    rtmpx::HeaderMode::Full
+                    kstream_rtmp::HeaderMode::Full
                 } else {
-                    rtmpx::HeaderMode::Compressed
+                    kstream_rtmp::HeaderMode::Compressed
                 },
                 drop_policy: if true {
-                    rtmpx::DropPolicy::Allowed
+                    kstream_rtmp::DropPolicy::Allowed
                 } else {
-                    rtmpx::DropPolicy::Never
+                    kstream_rtmp::DropPolicy::Never
                 },
             },
         )
@@ -365,16 +365,16 @@ fn size_change_is_sent_with_old_chunk_size_and_dropping_does_not_break_history()
     let next = serializer
         .encode(
             message(Bytes::from_static(b"ccc"), 30),
-            rtmpx::EncodeOptions {
+            kstream_rtmp::EncodeOptions {
                 headers: if false {
-                    rtmpx::HeaderMode::Full
+                    kstream_rtmp::HeaderMode::Full
                 } else {
-                    rtmpx::HeaderMode::Compressed
+                    kstream_rtmp::HeaderMode::Compressed
                 },
                 drop_policy: if false {
-                    rtmpx::DropPolicy::Allowed
+                    kstream_rtmp::DropPolicy::Allowed
                 } else {
-                    rtmpx::DropPolicy::Never
+                    kstream_rtmp::DropPolicy::Never
                 },
             },
         )
@@ -394,16 +394,16 @@ fn truncated_headers_and_payloads_remain_non_idle_and_limits_apply_to_owned_part
         serializer
             .encode(
                 (message(Bytes::from_static(b"abc"), 0)).clone(),
-                rtmpx::EncodeOptions {
+                kstream_rtmp::EncodeOptions {
                     headers: if true {
-                        rtmpx::HeaderMode::Full
+                        kstream_rtmp::HeaderMode::Full
                     } else {
-                        rtmpx::HeaderMode::Compressed
+                        kstream_rtmp::HeaderMode::Compressed
                     },
                     drop_policy: if false {
-                        rtmpx::DropPolicy::Allowed
+                        kstream_rtmp::DropPolicy::Allowed
                     } else {
-                        rtmpx::DropPolicy::Never
+                        kstream_rtmp::DropPolicy::Never
                     },
                 },
             )
@@ -425,7 +425,7 @@ fn truncated_headers_and_payloads_remain_non_idle_and_limits_apply_to_owned_part
 
 #[test]
 fn mixed_receive_ownership_preserves_partial_messages_and_limits() {
-    use rtmpx::chunk_io::DecoderLimits;
+    use kstream_rtmp::chunk_io::DecoderLimits;
     let message = RawMessage {
         timestamp: RtmpTimestamp::new(10),
         type_id: 9,
@@ -437,16 +437,16 @@ fn mixed_receive_ownership_preserves_partial_messages_and_limits() {
         serializer
             .encode(
                 (message).clone(),
-                rtmpx::EncodeOptions {
+                kstream_rtmp::EncodeOptions {
                     headers: if true {
-                        rtmpx::HeaderMode::Full
+                        kstream_rtmp::HeaderMode::Full
                     } else {
-                        rtmpx::HeaderMode::Compressed
+                        kstream_rtmp::HeaderMode::Compressed
                     },
                     drop_policy: if false {
-                        rtmpx::DropPolicy::Allowed
+                        kstream_rtmp::DropPolicy::Allowed
                     } else {
-                        rtmpx::DropPolicy::Never
+                        kstream_rtmp::DropPolicy::Never
                     },
                 },
             )
@@ -484,16 +484,16 @@ fn mixed_receive_ownership_preserves_partial_messages_and_limits() {
         serializer
             .encode(
                 (tiny).clone(),
-                rtmpx::EncodeOptions {
+                kstream_rtmp::EncodeOptions {
                     headers: if true {
-                        rtmpx::HeaderMode::Full
+                        kstream_rtmp::HeaderMode::Full
                     } else {
-                        rtmpx::HeaderMode::Compressed
+                        kstream_rtmp::HeaderMode::Compressed
                     },
                     drop_policy: if false {
-                        rtmpx::DropPolicy::Allowed
+                        kstream_rtmp::DropPolicy::Allowed
                     } else {
-                        rtmpx::DropPolicy::Never
+                        kstream_rtmp::DropPolicy::Never
                     },
                 },
             )

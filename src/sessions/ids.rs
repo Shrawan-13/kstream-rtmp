@@ -13,7 +13,7 @@ impl RequestId {
 /// RTMP message stream identifier, scoped to one connection.
 ///
 /// ```compile_fail
-/// use rtmpx::sessions::{ServerSession, StreamId};
+/// use kstream_rtmp::sessions::{ServerSession, StreamId};
 /// fn accept_stream_as_request(server: &mut ServerSession, stream: StreamId) {
 ///     server.accept_request(stream).unwrap();
 /// }

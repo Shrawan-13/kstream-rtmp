@@ -225,7 +225,7 @@ fn segmented_session_ingest_and_relay_retain_payload_storage() {
         assert!((part.as_ptr() as usize) + part.len() <= wire.as_ptr() as usize + wire.len());
     }
     assert_eq!(data.to_bytes(), original);
-    let mut encoder = rtmpx::chunk_io::ChunkEncoder::new();
+    let mut encoder = kstream_rtmp::chunk_io::ChunkEncoder::new();
     let plan = encoder
         .encode(
             RawMessage {
@@ -234,7 +234,7 @@ fn segmented_session_ingest_and_relay_retain_payload_storage() {
                 type_id: 9,
                 message_stream_id: stream_id,
             },
-            rtmpx::EncodeOptions::default(),
+            kstream_rtmp::EncodeOptions::default(),
         )
         .unwrap();
     let mut decoder = MessageDecoder::new();

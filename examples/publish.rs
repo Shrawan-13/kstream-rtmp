@@ -3,7 +3,7 @@
 #[path = "support/io.rs"]
 mod transport;
 use bytes::{Bytes, BytesMut};
-use rtmpx::{
+use kstream_rtmp::{
     DropPolicy,
     handshake::HandshakeRole,
     sessions::{

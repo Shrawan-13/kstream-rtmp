@@ -24,8 +24,8 @@ use std::time::{Duration, Instant};
 #[path = "support/io.rs"]
 mod transport;
 use bytes::Bytes;
-use rtmpx::handshake::{Handshake, HandshakeProgress, HandshakeRole};
-use rtmpx::sessions::{ServerEvent, ServerOutput, ServerSession, ServerSessionConfig};
+use kstream_rtmp::handshake::{Handshake, HandshakeProgress, HandshakeRole};
+use kstream_rtmp::sessions::{ServerEvent, ServerOutput, ServerSession, ServerSessionConfig};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpListener;
 
@@ -75,9 +75,9 @@ async fn write_results(
                     let Some(properties) = message.metadata()? else {
                         continue;
                     };
-                    let mut metadata = rtmpx::sessions::StreamMetadata::new();
+                    let mut metadata = kstream_rtmp::sessions::StreamMetadata::new();
                     metadata.apply_metadata_values(properties);
-                    let is_amf3 = message.wire_type() == rtmpx::sessions::DataMessageType::Amf3;
+                    let is_amf3 = message.wire_type() == kstream_rtmp::sessions::DataMessageType::Amf3;
                     meta += 1;
                     println!(
                         "[metadata #{meta}] key={stream_key} amf3={is_amf3} width={:?} height={:?} vcodec={:?} acodec={:?} encoder={:?}",

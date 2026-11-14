@@ -49,7 +49,7 @@
 //!
 //! ```
 //! use bytes::Bytes;
-//! use rtmpx::sessions::{ClientSession, ClientSessionConfig, ClientOutput};
+//! use kstream_rtmp::sessions::{ClientSession, ClientSessionConfig, ClientOutput};
 //!
 //! let mut client = ClientSession::new(ClientSessionConfig::default())?;
 //! client.connect("live")?;
@@ -60,7 +60,7 @@
 //! // A transport writes packet.io_slices(...), then advances by the written count.
 //! // Packet owns its payload and progress, so it can move between tasks.
 //! assert!(packet.remaining() > 0);
-//! # Ok::<(), rtmpx::sessions::ClientSessionError>(())
+//! # Ok::<(), kstream_rtmp::sessions::ClientSessionError>(())
 //! ```
 //!
 //! See [`zero_copy_guide`] for the complete receive loop, pooling, and allocation
@@ -72,7 +72,7 @@
 //!
 //! ```
 //! use bytes::Bytes;
-//! use rtmpx::{EnhancedValidationMode, ValidatedMedia};
+//! use kstream_rtmp::{EnhancedValidationMode, ValidatedMedia};
 //!
 //! // Extended header plus FourCC: one HEVC keyframe and its coded bytes.
 //! // The low nibble selects the packet family: 1 means coded frames.
@@ -90,7 +90,7 @@
 //!
 //! ```
 //! use bytes::Bytes;
-//! use rtmpx::{EnhancedValidationMode, ValidatedMedia};
+//! use kstream_rtmp::{EnhancedValidationMode, ValidatedMedia};
 //!
 //! let raw = Bytes::from_static(&[0xAF, 0x00, 0x11, 0x88]);
 //! let media =
@@ -112,6 +112,8 @@ mod test_utils {
 
 pub mod payload;
 pub use payload::{Payload, PayloadPool, PayloadPoolConfig, PayloadView, Segments};
+pub mod publisher;
+pub use publisher::{Publisher, PublisherConfig, PublisherError};
 pub mod amf;
 #[allow(clippy::all)]
 pub mod chunk_io;
@@ -133,7 +135,7 @@ pub use amf::amf0::Amf0Document;
 pub use amf::amf3::Amf3Document;
 pub use amf::{AmfEncoding, AmfProperties, AmfRead, AmfValue, ObjectId, TreeError, TreeLimits};
 // The AMF codecs live under `amf`. Their modules stay re-exported here so
-// existing `rtmpx::amf0` and `rtmpx::amf3` paths keep working.
+// existing `kstream_rtmp::amf0` and `kstream_rtmp::amf3` paths keep working.
 pub use amf::amf0::{Amf0DeserializationError, Amf0Object, Amf0SerializationError, Amf0Value};
 pub use amf::amf3::{Amf3DeserializationError, Amf3SerializationError, Amf3Value};
 pub use amf::{amf0, amf3};
@@ -157,7 +159,7 @@ pub mod zero_copy_guide {}
 pub use chunk_io::{DropPolicy, EncodeOptions, HeaderMode, Packet};
 
 #[cfg(test)]
-extern crate self as rtmpx;
+extern crate self as kstream_rtmp;
 #[cfg(test)]
 #[path = "../tests/support/api.rs"]
 mod api;

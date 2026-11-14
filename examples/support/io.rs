@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 //! Transport helpers for the examples. RTMPX itself performs no I/O.
 use bytes::{Bytes, BytesMut};
-use rtmpx::{
+use kstream_rtmp::{
     Packet, Segments,
     handshake::{Handshake, HandshakeProgress, HandshakeRole},
 };

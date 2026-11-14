@@ -356,7 +356,7 @@ fn enhanced_relay_is_byte_exact_between_two_sessions() {
 
 #[test]
 fn added_elementary_codecs_survive_sessions() -> Result<(), Box<dyn std::error::Error>> {
-    use rtmpx::{
+    use kstream_rtmp::{
         ElementaryCodec as C, ElementaryEvent as E, ElementaryUnit as U,
         EnhancedValidationMode as M, ValidatedMedia,
     };

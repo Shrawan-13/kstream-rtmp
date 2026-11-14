@@ -1,6 +1,6 @@
 //! Steady-state allocation contracts. Count only allocations on the measured thread.
 use bytes::Bytes;
-use rtmpx::{
+use kstream_rtmp::{
     chunk_io::{ChunkEncoder, ChunkParser, MessageDecoder},
     messages::RawMessage,
     time::RtmpTimestamp,
@@ -77,16 +77,16 @@ fn outbound_and_borrowed_inbound_are_allocation_free_after_warmup() {
             encoder
                 .encode(
                     (black_box(&message)).as_ref(),
-                    rtmpx::EncodeOptions {
+                    kstream_rtmp::EncodeOptions {
                         headers: if false {
-                            rtmpx::HeaderMode::Full
+                            kstream_rtmp::HeaderMode::Full
                         } else {
-                            rtmpx::HeaderMode::Compressed
+                            kstream_rtmp::HeaderMode::Compressed
                         },
                         drop_policy: if false {
-                            rtmpx::DropPolicy::Allowed
+                            kstream_rtmp::DropPolicy::Allowed
                         } else {
-                            rtmpx::DropPolicy::Never
+                            kstream_rtmp::DropPolicy::Never
                         },
                     },
                 )
@@ -148,16 +148,16 @@ fn owned_single_chunk_needs_no_message_allocation() {
         encoder
             .encode(
                 (message).clone(),
-                rtmpx::EncodeOptions {
+                kstream_rtmp::EncodeOptions {
                     headers: if true {
-                        rtmpx::HeaderMode::Full
+                        kstream_rtmp::HeaderMode::Full
                     } else {
-                        rtmpx::HeaderMode::Compressed
+                        kstream_rtmp::HeaderMode::Compressed
                     },
                     drop_policy: if false {
-                        rtmpx::DropPolicy::Allowed
+                        kstream_rtmp::DropPolicy::Allowed
                     } else {
-                        rtmpx::DropPolicy::Never
+                        kstream_rtmp::DropPolicy::Never
                     },
                 },
             )
@@ -179,7 +179,7 @@ mod session_support;
 
 #[test]
 fn validated_session_relay_is_allocation_free_with_recycled_descriptors() {
-    use rtmpx::{
+    use kstream_rtmp::{
         EnhancedValidationMode, PayloadPool, ValidatedMedia,
         sessions::{ServerEvent, ServerOutput},
     };
@@ -188,7 +188,7 @@ fn validated_session_relay_is_allocation_free_with_recycled_descriptors() {
             let (_, mut source, mut server, stream_id) =
                 session_support::publishing_server("live", "relay");
             let client = session_support::publishing_client(stream_id, "relay");
-            server.set_payload_pool(PayloadPool::new(rtmpx::PayloadPoolConfig {
+            server.set_payload_pool(PayloadPool::new(kstream_rtmp::PayloadPoolConfig {
                 max_cached_payloads: 4,
                 max_descriptors_per_payload: 8193,
             }));
@@ -211,16 +211,16 @@ fn validated_session_relay_is_allocation_free_with_recycled_descriptors() {
                 source
                     .encode(
                         (message).clone(),
-                        rtmpx::EncodeOptions {
+                        kstream_rtmp::EncodeOptions {
                             headers: if true {
-                                rtmpx::HeaderMode::Full
+                                kstream_rtmp::HeaderMode::Full
                             } else {
-                                rtmpx::HeaderMode::Compressed
+                                kstream_rtmp::HeaderMode::Compressed
                             },
                             drop_policy: if false {
-                                rtmpx::DropPolicy::Allowed
+                                kstream_rtmp::DropPolicy::Allowed
                             } else {
-                                rtmpx::DropPolicy::Never
+                                kstream_rtmp::DropPolicy::Never
                             },
                         },
                     )
@@ -254,7 +254,7 @@ fn validated_session_relay_is_allocation_free_with_recycled_descriptors() {
                                 .unwrap();
                                 assert!(media.classification().coded);
                                 client
-                                    .send_video(stream, data, timestamp, rtmpx::DropPolicy::Never)
+                                    .send_video(stream, data, timestamp, kstream_rtmp::DropPolicy::Never)
                                     .unwrap()
                             }
                             ServerOutput::Event(ServerEvent::AudioDataReceived {
@@ -269,7 +269,7 @@ fn validated_session_relay_is_allocation_free_with_recycled_descriptors() {
                                 .unwrap();
                                 assert!(media.classification().coded);
                                 client
-                                    .send_audio(stream, data, timestamp, rtmpx::DropPolicy::Never)
+                                    .send_audio(stream, data, timestamp, kstream_rtmp::DropPolicy::Never)
                                     .unwrap()
                             }
                             _ => panic!("unexpected control response"),
@@ -354,8 +354,8 @@ fn explicit_contiguous_decoder_allocations_do_not_scale_with_read_or_chunk_count
         let wire = encoder
             .encode(
                 message.as_ref(),
-                rtmpx::EncodeOptions {
-                    headers: rtmpx::HeaderMode::Full,
+                kstream_rtmp::EncodeOptions {
+                    headers: kstream_rtmp::HeaderMode::Full,
                     ..Default::default()
                 },
             )
@@ -381,7 +381,7 @@ fn explicit_contiguous_decoder_allocations_do_not_scale_with_read_or_chunk_count
 
 #[test]
 fn segmented_single_track_validation_needs_no_allocations() {
-    use rtmpx::{EnhancedValidationMode, Payload, ValidatedMedia};
+    use kstream_rtmp::{EnhancedValidationMode, Payload, ValidatedMedia};
     for (audio, wire) in [
         (true, b"\x91Opusframe".as_slice()),
         (true, b"\x97\x02\0\0\x01\x01Opusframe".as_slice()),
@@ -409,10 +409,10 @@ fn segmented_single_track_validation_needs_no_allocations() {
 
 #[test]
 fn concurrent_client_playback_routing_is_allocation_free_after_warmup() {
-    use rtmpx::sessions::{ClientEvent, ClientOutput, ClientSession, ClientSessionConfig};
+    use kstream_rtmp::sessions::{ClientEvent, ClientOutput, ClientSession, ClientSessionConfig};
     let mut peer = crate::api::chunk_io::ChunkEncoder::new();
     let mut client = ClientSession::new(ClientSessionConfig {
-        payload_pool: Some(rtmpx::PayloadPool::default()),
+        payload_pool: Some(kstream_rtmp::PayloadPool::default()),
         ..Default::default()
     })
     .unwrap();
@@ -451,8 +451,8 @@ fn concurrent_client_playback_routing_is_allocation_free_after_warmup() {
                 type_id: 9,
                 message_stream_id: stream_id,
             },
-            rtmpx::EncodeOptions {
-                headers: rtmpx::HeaderMode::Full,
+            kstream_rtmp::EncodeOptions {
+                headers: kstream_rtmp::HeaderMode::Full,
                 ..Default::default()
             },
         )
@@ -472,9 +472,9 @@ fn concurrent_client_playback_routing_is_allocation_free_after_warmup() {
                     panic!("unexpected output")
                 };
                 assert_eq!(stream, if seen == 0 { one } else { two });
-                let media = rtmpx::ValidatedMedia::parse_video(
+                let media = kstream_rtmp::ValidatedMedia::parse_video(
                     body.view(),
-                    rtmpx::EnhancedValidationMode::Strict,
+                    kstream_rtmp::EnhancedValidationMode::Strict,
                 )
                 .unwrap();
                 assert!(media.classification().coded);

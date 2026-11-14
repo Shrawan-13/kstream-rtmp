@@ -2,7 +2,7 @@
 use super::{fixtures::*, harness::red5_endpoint};
 use crate::common::{Result, legacy_metadata, run, stream_key};
 use bytes::{Bytes, BytesMut};
-use rtmpx::{
+use kstream_rtmp::{
     AmfEncoding, DropPolicy, Packet,
     handshake::HandshakeRole,
     sessions::{

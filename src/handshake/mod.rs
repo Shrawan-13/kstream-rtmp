@@ -91,7 +91,7 @@ enum Stage {
 /// ## Examples
 ///
 /// ```
-/// use rtmpx::handshake::{Handshake, HandshakeRole, HandshakeProgress};
+/// use kstream_rtmp::handshake::{Handshake, HandshakeRole, HandshakeProgress};
 ///
 /// let mut client = Handshake::new(HandshakeRole::Client);
 /// let mut server = Handshake::new(HandshakeRole::Server);

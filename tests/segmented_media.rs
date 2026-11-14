@@ -1,5 +1,5 @@
 use bytes::Bytes;
-use rtmpx::{EnhancedValidationMode, MediaInterpretation, Payload, Segments, ValidatedMedia};
+use kstream_rtmp::{EnhancedValidationMode, MediaInterpretation, Payload, Segments, ValidatedMedia};
 
 #[test]
 fn every_split_and_truncated_prefix_matches_contiguous_validation() {
@@ -82,7 +82,7 @@ fn every_split_and_truncated_prefix_matches_contiguous_validation() {
 
 #[test]
 fn parsed_body_borrows_original_segments() {
-    use rtmpx::flv::{EnhancedVideoBody, VideoPacket, VideoTagBody};
+    use kstream_rtmp::flv::{EnhancedVideoBody, VideoPacket, VideoTagBody};
     let payload: Payload = [
         Bytes::from_static(b"\x91hv"),
         Bytes::from_static(b"c1\xff"),

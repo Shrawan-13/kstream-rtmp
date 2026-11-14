@@ -11,7 +11,7 @@
 //! Basic arithmetic and comparison support:
 //!
 //! ```
-//! use rtmpx::time::RtmpTimestamp;
+//! use kstream_rtmp::time::RtmpTimestamp;
 //!
 //! let time1 = RtmpTimestamp::new(10);
 //! let time2 = RtmpTimestamp::new(20);
@@ -29,7 +29,7 @@
 //! Value Wrapping support:
 //!
 //! ```
-//! use rtmpx::time::RtmpTimestamp;
+//! use kstream_rtmp::time::RtmpTimestamp;
 //!
 //! let time1 = RtmpTimestamp::new(10000);
 //! let time2 = RtmpTimestamp::new(4000000000);
@@ -42,7 +42,7 @@
 //! Construct timestamps from raw values before serial comparison. Equality also accepts `u32`:
 //!
 //! ```
-//! use rtmpx::time::RtmpTimestamp;
+//! use kstream_rtmp::time::RtmpTimestamp;
 //!
 //! let time = RtmpTimestamp::new(50);
 //!
@@ -60,13 +60,13 @@ use std::ops::{Add, Sub};
 /// Use [`Self::serial_cmp`] for nearby timestamps or unwrap the clock before sorting.
 ///
 /// ```compile_fail
-/// use rtmpx::time::RtmpTimestamp;
+/// use kstream_rtmp::time::RtmpTimestamp;
 /// let mut times = [RtmpTimestamp::new(0), RtmpTimestamp::new(1)];
 /// times.sort(); // A circular clock does not implement Ord.
 /// ```
 ///
 /// ```compile_fail
-/// use rtmpx::time::RtmpTimestamp;
+/// use kstream_rtmp::time::RtmpTimestamp;
 /// let _ = RtmpTimestamp::new(0) < RtmpTimestamp::new(1);
 /// ```
 #[derive(Eq, PartialEq, Debug, Copy, Clone)]
@@ -208,7 +208,7 @@ mod tests {
 
     #[test]
     fn can_add_timestamps_that_overflow_u32() {
-        let time1 = RtmpTimestamp::new(u32::max_value());
+        let time1 = RtmpTimestamp::new(u32::MAX);
         let time2 = RtmpTimestamp::new(60);
         let result = time1 + time2;
 
@@ -217,7 +217,7 @@ mod tests {
 
     #[test]
     fn can_add_number_to_timestamp_that_overflows_u32() {
-        let time = RtmpTimestamp::new(u32::max_value());
+        let time = RtmpTimestamp::new(u32::MAX);
         let result = time + 60;
 
         assert_eq!(result.value, 59);
@@ -246,7 +246,7 @@ mod tests {
         let time2 = RtmpTimestamp::new(50);
         let result = time1 - time2;
 
-        assert_eq!(result.value, u32::max_value() - 49);
+        assert_eq!(result.value, u32::MAX - 49);
     }
 
     #[test]
@@ -254,7 +254,7 @@ mod tests {
         let time = RtmpTimestamp::new(0);
         let result = time - 50;
 
-        assert_eq!(result.value, u32::max_value() - 49);
+        assert_eq!(result.value, u32::MAX - 49);
     }
 
     #[test]

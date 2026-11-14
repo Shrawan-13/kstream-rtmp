@@ -1,6 +1,6 @@
 //! Stream lifecycle tests use only the public API.
 use bytes::Bytes;
-use rtmpx::{DropPolicy, Packet, sessions::*, time::RtmpTimestamp};
+use kstream_rtmp::{DropPolicy, Packet, sessions::*, time::RtmpTimestamp};
 
 struct Pair {
     client: ClientSession,
@@ -279,9 +279,9 @@ fn handles_cannot_cross_sessions_even_when_wire_ids_match() {
 }
 
 struct MockPeer {
-    encoder: rtmpx::chunk_io::ChunkEncoder,
-    decoder: rtmpx::chunk_io::MessageDecoder,
-    commands: Vec<(u32, String, f64, Vec<rtmpx::Amf0Value>)>,
+    encoder: kstream_rtmp::chunk_io::ChunkEncoder,
+    decoder: kstream_rtmp::chunk_io::MessageDecoder,
+    commands: Vec<(u32, String, f64, Vec<kstream_rtmp::Amf0Value>)>,
     events: Vec<ClientEvent>,
 }
 impl MockPeer {
@@ -290,8 +290,8 @@ impl MockPeer {
     }
     fn with_limits(limits: SessionLimits) -> (Self, ClientSession) {
         let mut peer = Self {
-            encoder: rtmpx::chunk_io::ChunkEncoder::new(),
-            decoder: rtmpx::chunk_io::MessageDecoder::new(),
+            encoder: kstream_rtmp::chunk_io::ChunkEncoder::new(),
+            decoder: kstream_rtmp::chunk_io::MessageDecoder::new(),
             commands: Vec::new(),
             events: Vec::new(),
         };
@@ -307,7 +307,7 @@ impl MockPeer {
             &mut client,
             "_result",
             txn,
-            vec![rtmpx::Amf0Value::Object(Default::default())],
+            vec![kstream_rtmp::Amf0Value::Object(Default::default())],
         );
         peer.commands.clear();
         peer.events.clear();
@@ -321,14 +321,14 @@ impl MockPeer {
                     while let Some(raw) = self.decoder.decode(&mut bytes).unwrap() {
                         let id = raw.message_stream_id;
                         let message = raw
-                            .map_data(rtmpx::Payload::into_bytes)
+                            .map_data(kstream_rtmp::Payload::into_bytes)
                             .to_rtmp_message()
                             .unwrap();
                         match message {
-                            rtmpx::messages::RtmpMessage::SetChunkSize { size } => {
+                            kstream_rtmp::messages::RtmpMessage::SetChunkSize { size } => {
                                 self.decoder.set_chunk_size(size as usize).unwrap()
                             }
-                            rtmpx::messages::RtmpMessage::Amf0Command {
+                            kstream_rtmp::messages::RtmpMessage::Amf0Command {
                                 command_name,
                                 transaction_id,
                                 additional_arguments,
@@ -353,12 +353,12 @@ impl MockPeer {
         client: &mut ClientSession,
         name: &str,
         transaction: f64,
-        args: Vec<rtmpx::Amf0Value>,
+        args: Vec<kstream_rtmp::Amf0Value>,
     ) {
-        let message = rtmpx::messages::RtmpMessage::Amf0Command {
+        let message = kstream_rtmp::messages::RtmpMessage::Amf0Command {
             command_name: name.into(),
             transaction_id: transaction,
-            command_object: rtmpx::Amf0Value::Null,
+            command_object: kstream_rtmp::Amf0Value::Null,
             additional_arguments: args,
         };
         let packet = self
@@ -374,7 +374,7 @@ impl MockPeer {
 
 #[test]
 fn reversed_creation_responses_keep_request_identity_and_reused_slots_distinct() {
-    use rtmpx::Amf0Value as V;
+    use kstream_rtmp::Amf0Value as V;
     let (mut peer, mut client) = MockPeer::new();
     let first = client.play("first").unwrap();
     let second = client.publish("second", PublishMode::Append).unwrap();
@@ -430,7 +430,7 @@ fn reversed_creation_responses_keep_request_identity_and_reused_slots_distinct()
 
 #[test]
 fn rejecting_one_creation_preserves_other_streams_and_reports_its_handle() {
-    use rtmpx::Amf0Value as V;
+    use kstream_rtmp::Amf0Value as V;
     let (mut peer, mut client) = MockPeer::new();
     let bad = client.play("missing").unwrap();
     let good = client.publish("good", PublishMode::Live).unwrap();
@@ -514,7 +514,7 @@ fn client_limits_include_cancelled_but_unanswered_creations() {
         &mut client,
         "_result",
         transaction,
-        vec![rtmpx::Amf0Value::Number(1.0)],
+        vec![kstream_rtmp::Amf0Value::Number(1.0)],
     );
     assert!(client.play("released").is_ok());
 }
@@ -559,13 +559,13 @@ fn server_bounds_requests_awaiting_application_decisions() {
     pair.drive_with_acceptance(false);
     let wire_id = pair.client.stream_id(first).unwrap();
     // A peer can send repeated requests without waiting for our application decision.
-    let message = rtmpx::messages::RtmpMessage::Amf0Command {
+    let message = kstream_rtmp::messages::RtmpMessage::Amf0Command {
         command_name: "play".into(),
         transaction_id: 0.0,
-        command_object: rtmpx::Amf0Value::Null,
-        additional_arguments: vec![rtmpx::Amf0Value::Utf8String("second".into())],
+        command_object: kstream_rtmp::Amf0Value::Null,
+        additional_arguments: vec![kstream_rtmp::Amf0Value::Utf8String("second".into())],
     };
-    let packet = rtmpx::chunk_io::ChunkEncoder::new()
+    let packet = kstream_rtmp::chunk_io::ChunkEncoder::new()
         .encode(
             message
                 .into_raw_message(RtmpTimestamp::new(0), wire_id.get())

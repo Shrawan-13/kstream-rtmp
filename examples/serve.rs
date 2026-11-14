@@ -2,7 +2,7 @@
 #[path = "support/io.rs"]
 mod transport;
 use bytes::BytesMut;
-use rtmpx::{
+use kstream_rtmp::{
     EnhancedValidationMode, PayloadPool, ValidatedMedia,
     handshake::HandshakeRole,
     sessions::{ServerEvent, ServerOutput, ServerSession, ServerSessionConfig},

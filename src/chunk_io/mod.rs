@@ -27,7 +27,7 @@ Sessions perform these steps automatically.
 
 ```
 use bytes::Bytes;
-use rtmpx::{EncodeOptions, chunk_io::{ChunkEncoder, MessageDecoder}, messages::RawMessage, time::RtmpTimestamp};
+use kstream_rtmp::{EncodeOptions, chunk_io::{ChunkEncoder, MessageDecoder}, messages::RawMessage, time::RtmpTimestamp};
 let message = RawMessage { timestamp: RtmpTimestamp::new(55), message_stream_id: 1,
     type_id: 9, data: Bytes::from_static(b"sample") };
 let mut encoder = ChunkEncoder::new();
