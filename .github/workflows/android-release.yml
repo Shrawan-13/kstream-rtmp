@@ -69,8 +69,9 @@ jobs:
             esac
             CC="$TOOLCHAIN/bin/$CC_NAME"
             AR="$TOOLCHAIN/bin/llvm-ar"
-            CARGO_TARGET_$(echo $T | tr 'a-z-' 'A-Z_')_LINKER="$CC" \
-            AR_$(echo $T | tr 'a-z-' 'A-Z_')="$AR" \
+            ENV_PREFIX=$(echo "$T" | tr 'a-z-' 'A-Z_')
+            export "CARGO_TARGET_${ENV_PREFIX}_LINKER=$CC"
+            export "AR_${ENV_PREFIX}=$AR"
             cargo build -p kstream-rtmp-ffi --release --target "$T"
           done
 

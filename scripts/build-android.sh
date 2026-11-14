@@ -22,10 +22,17 @@ API="${API_LEVEL:-24}"
 
 for T in $TARGETS; do
   echo ">> building $T (API $API)"
-  CC="$TOOLCHAIN/bin/${T}${API}-clang"
+  case "$T" in
+    aarch64-linux-android) CC_NAME="aarch64-linux-android${API}-clang" ;;
+    armv7-linux-androideabi) CC_NAME="armv7a-linux-androideabi${API}-clang" ;;
+    i686-linux-android) CC_NAME="i686-linux-android${API}-clang" ;;
+    x86_64-linux-android) CC_NAME="x86_64-linux-android${API}-clang" ;;
+  esac
+  CC="$TOOLCHAIN/bin/$CC_NAME"
   AR="$TOOLCHAIN/bin/llvm-ar"
-  CARGO_TARGET_$(echo $T | tr 'a-z-' 'A-Z_')_LINKER="$CC" \
-  AR_$(echo $T | tr 'a-z-' 'A-Z_')="$AR" \
+  ENV_PREFIX=$(echo "$T" | tr 'a-z-' 'A-Z_')
+  export "CARGO_TARGET_${ENV_PREFIX}_LINKER=$CC"
+  export "AR_${ENV_PREFIX}=$AR"
   cargo build --release --target "$T"
 done
 
