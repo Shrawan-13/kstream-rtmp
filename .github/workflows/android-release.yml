@@ -1,0 +1,108 @@
+name: Android release (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (e.g. v0.1.0)"
+        required: true
+        default: "v0.1.0"
+      prerelease:
+        description: "Mark as pre-release"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+
+      - name: Setup Android NDK
+        id: setup-ndk
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r27c
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: kstream-rtmp-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build host ffi (for bindgen)
+        run: cargo build -p kstream-rtmp-ffi
+
+      - name: Generate Kotlin bindings
+        run: |
+          mkdir -p out/kotlin
+          cargo run -p kstream-rtmp-ffi --bin uniffi-bindgen -- generate \
+            --language kotlin --no-format \
+            --out-dir out/kotlin \
+            --library target/debug/libkstream_rtmp_ffi.so
+
+      - name: Build Android targets
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run: |
+          NDK="${ANDROID_NDK_HOME}"
+          TOOLCHAIN="$NDK/toolchains/llvm/prebuilt/linux-x86_64"
+          export PATH="$TOOLCHAIN/bin:$PATH"
+          for T in aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android; do
+            echo ">> $T"
+            case "$T" in
+              aarch64-linux-android) CC_NAME="aarch64-linux-android24-clang" ;;
+              armv7-linux-androideabi) CC_NAME="armv7a-linux-androideabi24-clang" ;;
+              i686-linux-android) CC_NAME="i686-linux-android24-clang" ;;
+              x86_64-linux-android) CC_NAME="x86_64-linux-android24-clang" ;;
+            esac
+            CC="$TOOLCHAIN/bin/$CC_NAME"
+            AR="$TOOLCHAIN/bin/llvm-ar"
+            CARGO_TARGET_$(echo $T | tr 'a-z-' 'A-Z_')_LINKER="$CC" \
+            AR_$(echo $T | tr 'a-z-' 'A-Z_')="$AR" \
+            cargo build -p kstream-rtmp-ffi --release --target "$T"
+          done
+
+      - name: Collect jniLibs
+        run: |
+          mkdir -p out/jniLibs
+          declare -A ABI=(
+            [aarch64-linux-android]=arm64-v8a
+            [armv7-linux-androideabi]=armeabi-v7a
+            [i686-linux-android]=x86
+            [x86_64-linux-android]=x86_64
+          )
+          for T in aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android; do
+            ABI_NAME=${ABI[$T]}
+            mkdir -p "out/jniLibs/$ABI_NAME"
+            cp "target/$T/release/libkstream_rtmp_ffi.so" "out/jniLibs/$ABI_NAME/"
+          done
+          find out/jniLibs -type f -name '*.so' -printf '%p %s bytes\n'
+
+      - name: Package release artifact
+        run: |
+          cd out
+          zip -r ../kstream-rtmp-android.zip jniLibs kotlin
+          cd ..
+          ls -lh kstream-rtmp-android.zip
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag }}
+          name: kstream-rtmp ${{ inputs.tag }}
+          prerelease: ${{ inputs.prerelease }}
+          files: |
+            kstream-rtmp-android.zip
+          generate_release_notes: true

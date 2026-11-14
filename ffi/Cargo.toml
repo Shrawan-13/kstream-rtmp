@@ -1,0 +1,18 @@
+[package]
+name = "kstream-rtmp-ffi"
+version = "0.1.0"
+edition = "2024"
+description = "UniFFI (Kotlin) bindings for kstream-rtmp"
+license = "MIT"
+
+[lib]
+name = "kstream_rtmp_ffi"
+crate-type = ["lib", "cdylib", "staticlib"]
+
+[dependencies]
+kstream-rtmp = { path = ".." }
+uniffi = { version = "0.32", features = ["cli"] }
+
+[[bin]]
+name = "uniffi-bindgen"
+path = "src/bin/uniffi_bindgen.rs"
